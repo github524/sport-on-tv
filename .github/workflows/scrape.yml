@@ -29,7 +29,13 @@ jobs:
       # 4. Run the scraper
       - run: python scraper/scrape_wtm.py
 
-      # 5. Commit & push the updated JSON
+      # 5. Ensure tv_schedule.json exists (create if missing)
+      - run: |
+          if [ ! -f tv_schedule.json ]; then
+            echo '{"status": "placeholder", "generated_at": null}' > tv_schedule.json
+          fi
+
+      # 6. Commit & push the updated JSON
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
