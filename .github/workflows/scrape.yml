@@ -29,10 +29,11 @@ jobs:
       # Step 4: Run scraper
       - run: python scraper/scrape_wtm.py
 
-      # Step 5: Commit and push tv_schedule.json
-      - run: |
+      # Step 5: Commit and force push
+      - name: Commit and push tv_schedule.json
+        run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
-          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main --force
