@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 5 * * *"   # daily at 05:00 UTC
+    - cron: "0 7 * * *"   # daily at 07:00 UTC (7 AM GMT)
   workflow_dispatch:
 
 jobs:
@@ -18,4 +18,22 @@ jobs:
           persist-credentials: true
           fetch-depth: 0
 
-      #
+      # 2. Set up Python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install scraper dependencies
+      - run: pip install requests beautifulsoup4
+
+      # 4. Run the scraper
+      - run: python scraper/scrape_wtm.py
+
+      # 5. Commit & push the updated JSON
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin main --rebase || echo "No changes to pull"
+          git add tv_schedule.json
+          git commit -m "Update TV schedule" || echo "No changes"
+          git push origin main
