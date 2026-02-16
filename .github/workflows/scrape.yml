@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository with full history
+      # Checkout full repository
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -35,7 +35,8 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout main
+          git fetch origin main
+          git reset --soft origin/main
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
           git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
