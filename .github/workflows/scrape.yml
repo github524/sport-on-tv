@@ -5,18 +5,18 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 7 * * *"  # daily 07:00 GMT
+    - cron: "0 7 * * *"   # daily at 07:00 GMT
   workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout repo
+      # 1. Checkout the repo
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
-          fetch-depth: 0  # full history
+          fetch-depth: 0
 
       # 2. Set up Python
       - uses: actions/setup-python@v5
@@ -26,15 +26,22 @@ jobs:
       # 3. Install dependencies
       - run: pip install requests beautifulsoup4
 
-      # 4. Run scraper
+      # 4. Check if tv_schedule.json exists; delete if it does
+      - run: |
+          if [ -f tv_schedule.json ]; then
+            echo "tv_schedule.json exists — deleting for clean run"
+            rm tv_schedule.json
+          else
+            echo "tv_schedule.json does not exist — creating new file"
+          fi
+
+      # 5. Run scraper to generate new JSON
       - run: python scraper/scrape_wtm.py
 
-      # 5. Sync with remote commits before committing JSON
+      # 6. Commit & push JSON
       - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git pull --rebase origin main || echo "No remote changes to pull"
-
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
           git push origin main
