@@ -5,35 +5,37 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 7 * * *"   # runs daily at 07:00 GMT
-  workflow_dispatch:       # allows manual trigger
+    - cron: "0 7 * * *"   # 07:00 GMT daily
+  workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository with credentials
+      # Checkout repository with full history
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: true
 
-      # Step 2: Setup Python
+      # Setup Python
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # Step 3: Install dependencies
+      # Install dependencies
       - run: pip install requests beautifulsoup4
 
-      # Step 4: Run scraper
+      # Run scraper
       - run: python scraper/scrape_wtm.py
 
-      # Step 5: Commit and force push
+      # Commit and force push
       - name: Commit and push tv_schedule.json
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git checkout main
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main --force
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
