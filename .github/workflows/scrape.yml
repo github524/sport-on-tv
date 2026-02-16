@@ -5,14 +5,14 @@ permissions:
 
 on:
   schedule:
-    - cron: "0 7 * * *"   # daily at 07:00 UTC (7 AM GMT)
+    - cron: "0 7 * * *"   # 7 AM GMT
   workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repo with full history and credentials
+      # 1. Checkout the repo with full history
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 3. Install scraper dependencies
+      # 3. Install dependencies
       - run: pip install requests beautifulsoup4
 
       # 4. Run the scraper
@@ -35,18 +35,17 @@ jobs:
             echo '{"status": "placeholder", "generated_at": null}' > tv_schedule.json
           fi
 
-      # 6. Commit and push safely with remote sync
+      # 6. Sync with remote, commit, and push
       - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          # Fetch remote changes and reset local branch to match remote
-          git fetch origin main
-          git reset --soft origin/main
+          # Pull remote changes and rebase
+          git pull --rebase origin main || echo "No remote changes to pull"
 
-          # Stage and commit changes
+          # Add and commit changes
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
 
-          # Push updates to main branch
+          # Push changes
           git push origin main
