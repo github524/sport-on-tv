@@ -1,5 +1,8 @@
 name: Scrape TV Listings
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Runs every day at 05:00 UTC (early morning UK time)
