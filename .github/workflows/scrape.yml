@@ -35,10 +35,18 @@ jobs:
             echo '{"status": "placeholder", "generated_at": null}' > tv_schedule.json
           fi
 
-      # 6. Commit and force push only tv_schedule.json
+      # 6. Commit and push safely with remote sync
       - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Fetch remote changes and reset local branch to match remote
+          git fetch origin main
+          git reset --soft origin/main
+
+          # Stage and commit changes
           git add tv_schedule.json
           git commit -m "Update TV schedule" || echo "No changes"
-          git push origin main --force tv_schedule.json
+
+          # Push updates to main branch
+          git push origin main
